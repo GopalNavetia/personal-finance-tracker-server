@@ -77,4 +77,25 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            UnauthorizedException exception,
+            HttpServletRequest request
+    ) {
+
+
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.FORBIDDEN
+        );
+
+    }
+
 }
