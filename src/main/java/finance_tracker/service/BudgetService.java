@@ -11,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 
 
 @Service
@@ -32,6 +32,9 @@ public class BudgetService {
     ) {
 
 
+        LocalDate now = LocalDate.now();
+
+
         List<Category> categories =
                 categoryRepository.findByUserId(userId);
 
@@ -45,6 +48,7 @@ public class BudgetService {
         for(Category category : categories) {
 
 
+
             List<Transaction> transactions =
                     transactionRepository
                             .findByUserIdAndCategoryId(
@@ -53,12 +57,31 @@ public class BudgetService {
                             );
 
 
+
             double spent = transactions.stream()
+
+                    // Only expenses
                     .filter(transaction ->
                             transaction.getType()
                                     == TransactionType.EXPENSE
                     )
+
+                    // Only current month
+                    .filter(transaction ->
+                            transaction.getDate()
+                                    .getMonth()
+                                    == now.getMonth()
+                    )
+
+                    // Only current year
+                    .filter(transaction ->
+                            transaction.getDate()
+                                    .getYear()
+                                    == now.getYear()
+                    )
+
                     .mapToDouble(Transaction::getAmount)
+
                     .sum();
 
 
@@ -70,11 +93,27 @@ public class BudgetService {
 
             BudgetResponse response =
                     BudgetResponse.builder()
-                            .categoryId(category.getId())
-                            .categoryName(category.getName())
-                            .budget(category.getBudget())
-                            .spent(spent)
-                            .remaining(remaining)
+
+                            .categoryId(
+                                    category.getId()
+                            )
+
+                            .categoryName(
+                                    category.getName()
+                            )
+
+                            .budget(
+                                    category.getBudget()
+                            )
+
+                            .spent(
+                                    spent
+                            )
+
+                            .remaining(
+                                    remaining
+                            )
+
                             .build();
 
 
@@ -82,6 +121,7 @@ public class BudgetService {
             responses.add(response);
 
         }
+
 
 
         return responses;

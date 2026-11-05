@@ -13,4 +13,5 @@ public interface CategoryRepository
 
     List<Category> findByUserId(String userId);
 
+    long countByUserId(String userId);
 }
